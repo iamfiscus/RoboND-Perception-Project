@@ -53,14 +53,14 @@ def pcl_callback(pcl_msg):
 
     # TODO: Convert ROS msg to PCL data
     cloud = ros_to_pcl(pcl_msg)
-    
+
 
     # TODO: Statistical Outlier Filtering
     outlier_filter = cloud.make_statistical_outlier_filter()
     outlier_filter.set_mean_k(10) # the number of neighboring points
     outlier_filter.set_std_dev_mul_thresh(0.3) # threshold
     cloud_filtered = outlier_filter.filter()
-    
+
 
     # TODO: Voxel Grid Downsampling
     vox = cloud.make_voxel_grid_filter()
@@ -86,6 +86,15 @@ def pcl_callback(pcl_msg):
     passthrough.set_filter_limits(axis_min, axis_max)
 
     ## Finally use the filter function to obtain the resultant point cloud.
+    cloud_filtered = passthrough.filter()
+
+    passthrough = cloud_filtered.make_passthrough_filter()
+    filter_axis = 'y'
+    passthrough.set_filter_field_name (filter_axis)
+    axis_min = -0.4
+    axis_max = 0.4
+    passthrough.set_filter_limits (axis_min, axis_max)
+    
     cloud_filtered = passthrough.filter()
 
 
@@ -249,8 +258,8 @@ def pr2_mover(object_list):
     # TODO: Loop through the pick list
     dict_list = []
     for i in range(len(object_list_param)):
- 
-       
+
+
         # TODO: Get the PointCloud for a given object and obtain it's centroid
         object_name.data = object_list_param[i]['name']
 
@@ -258,26 +267,26 @@ def pr2_mover(object_list):
         pick_pose.position.x = float(centroid[0])
         pick_pose.position.y = float(centroid[1])
         pick_pose.position.z = float(centroid[2])
-        
 
-        
+
+
         # TODO: Create 'place_pose' for the object
         dropbox_pos = dropbox_dict.get(object_list_param[i]['group'])[1]
         place_pose.position.x = float(dropbox_pos[0])
         place_pose.position.y = float(dropbox_pos[1])
         place_pose.position.z = float(dropbox_pos[2])
 
-        
+
         # TODO: Assign the arm to be used for pick_place
         arm_name.data = dropbox_dict.get(object_list_param[i]['group'])[0]
-    
+
 
         # TODO: Create a list of dictionaries (made with make_yaml_dict()) for later output to yaml format
         # Populate various ROS messages
         yaml_dict = make_yaml_dict(test_scene_num, arm_name, object_name, pick_pose, place_pose)
         dict_list.append(yaml_dict)
 
-    
+
         # Wait for 'pick_place_routine' service to come up
         rospy.wait_for_service('pick_place_routine')
 
