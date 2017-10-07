@@ -53,17 +53,17 @@ def pcl_callback(pcl_msg):
 
     # TODO: Convert ROS msg to PCL data
     cloud = ros_to_pcl(pcl_msg)
-    
+
 
     # TODO: Statistical Outlier Filtering
     outlier_filter = cloud.make_statistical_outlier_filter()
     outlier_filter.set_mean_k(10) # the number of neighboring points
     outlier_filter.set_std_dev_mul_thresh(0.3) # threshold
-    cloud_filtered = outlier_filter.filter()
-    
+    cloud_stat_filtered = outlier_filter.filter()
+
 
     # TODO: Voxel Grid Downsampling
-    vox = cloud.make_voxel_grid_filter()
+    vox = cloud_stat_filtered.make_voxel_grid_filter()
     ## Choose a voxel (also known as leaf) size
     LEAF_SIZE = 0.01
 
@@ -86,6 +86,15 @@ def pcl_callback(pcl_msg):
     passthrough.set_filter_limits(axis_min, axis_max)
 
     ## Finally use the filter function to obtain the resultant point cloud.
+    cloud_filtered = passthrough.filter()
+
+    passthrough = cloud_filtered.make_passthrough_filter()
+    filter_axis = 'y'
+    passthrough.set_filter_field_name (filter_axis)
+    axis_min = -0.4
+    axis_max = 0.4
+    passthrough.set_filter_limits (axis_min, axis_max)
+
     cloud_filtered = passthrough.filter()
 
 
@@ -122,7 +131,7 @@ def pcl_callback(pcl_msg):
     ## Set tolerances for distance threshold
     ## as well as minimum and maximum cluster size (in points)
     ec.set_ClusterTolerance(0.05)
-    ec.set_MinClusterSize(20)
+    ec.set_MinClusterSize(30)
     ec.set_MaxClusterSize(2000)
     ## Search the k-d tree for clusters
     ec.set_SearchMethod(tree)
@@ -223,7 +232,7 @@ def pr2_mover(object_list):
     object_list_param = rospy.get_param('/object_list')
     dropbox_param = rospy.get_param('/dropbox')
     #output_index = rospy.get_param('test_scene_num')
-    output_index = 2
+    output_index = 3
     test_scene_num.data = output_index
 
 
@@ -249,8 +258,8 @@ def pr2_mover(object_list):
     # TODO: Loop through the pick list
     dict_list = []
     for i in range(len(object_list_param)):
- 
-       
+
+
         # TODO: Get the PointCloud for a given object and obtain it's centroid
         object_name.data = object_list_param[i]['name']
 
@@ -258,42 +267,43 @@ def pr2_mover(object_list):
         pick_pose.position.x = float(centroid[0])
         pick_pose.position.y = float(centroid[1])
         pick_pose.position.z = float(centroid[2])
-        
 
-        
+
+
         # TODO: Create 'place_pose' for the object
         dropbox_pos = dropbox_dict.get(object_list_param[i]['group'])[1]
         place_pose.position.x = float(dropbox_pos[0])
         place_pose.position.y = float(dropbox_pos[1])
         place_pose.position.z = float(dropbox_pos[2])
 
-        
+
         # TODO: Assign the arm to be used for pick_place
         arm_name.data = dropbox_dict.get(object_list_param[i]['group'])[0]
-    
+
 
         # TODO: Create a list of dictionaries (made with make_yaml_dict()) for later output to yaml format
         # Populate various ROS messages
         yaml_dict = make_yaml_dict(test_scene_num, arm_name, object_name, pick_pose, place_pose)
         dict_list.append(yaml_dict)
 
-    
+
         # Wait for 'pick_place_routine' service to come up
         rospy.wait_for_service('pick_place_routine')
 
         try:
             pick_place_routine = rospy.ServiceProxy('pick_place_routine', PickPlace)
-
+            print "line"
             # TODO: Insert your message variables to be sent as a service request
-            resp = pick_place_routine(test_scene_num, object_name, arm_name, pick_pose, place_pose)
+            #resp = pick_place_routine(test_scene_num, object_name, arm_name, pick_pose, place_pose)
 
-            print ("Response: ",resp.success)
+            #print ("Response: ",resp.success)
 
         except rospy.ServiceException, e:
             print "Service call failed: %s"%e
 
     # TODO: Output your request parameters into output yaml file
-    send_to_yaml('output_' + str(output_index) + '.yaml', dict_list)
+    send_to_yaml('/home/robond/catkin_ws/src/RoboND-Perception-Project/pr2_robot/scripts/output_' + str(output_index) + '.yaml', dict_list)
+    print "Yaml created"
 
 
 if __name__ == '__main__':
@@ -328,3 +338,4 @@ if __name__ == '__main__':
     # TODO: Spin while node is not shutdown
     while not rospy.is_shutdown():
      rospy.spin()
+
