@@ -30,30 +30,37 @@
 ---
 ### Writeup / README
 
-#### 1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.  
+[output1]: ./images/output1.png
+[output2]: ./images/output3.png
+[output3]: ./images/output2.png
+[matrix]: ./images/normalized_confusion_matrix.png
 
-You're reading it!
+#### 1. Provide a Writeup / README that includes all the rubric points and how you addressed each one.  You can submit your writeup as markdown or pdf.  
 
 ### Exercise 1, 2 and 3 pipeline implemented
 #### 1. Complete Exercise 1 steps. Pipeline for filtering and RANSAC plane fitting implemented.
+Review the following [code](./pr2_robot/scripts/project.py#L58-L121)
 
 #### 2. Complete Exercise 2 steps: Pipeline including clustering for segmentation implemented.  
+Review the following [code](./pr2_robot/scripts/project.py#L124-L153)
 
-#### 2. Complete Exercise 3 Steps.  Features extracted and SVM trained.  Object recognition implemented.
-Here is an example of how to include an image in your writeup.
+#### 3. Complete Exercise 3 Steps.  Features extracted and SVM trained.  Object recognition implemented.
+Review the following [code](./pr2_robot/scripts/project.py#L168)
 
-![demo-1](https://user-images.githubusercontent.com/20687560/28748231-46b5b912-7467-11e7-8778-3095172b7b19.png)
+Here is my normalized confusion matrix:
+![normalized confusion matrix][matrix]
 
+Here is the result for world 1:
+![output 1][output1]
+[output_1.yaml](./pr2_robot/scripts/output_1.yaml)
 
+Here is the result for world 2:
+![output 2][output2]
+[output_2.yaml](./pr2_robot/scripts/output_2.yaml)
 
-
-Here's | A | Snappy | Table
---- | --- | --- | ---
-1 | `highlight` | **bold** | 7.41
-2 | a | b | c
-3 | *italic* | text | 403
-4 | 2 | 3 | abcd
-
+Here is the result for world 3:
+![output 3][output3]
+[output_3.yaml](./pr2_robot/scripts/output_3.yaml)
 
 ### Pick and Place Setup
 
